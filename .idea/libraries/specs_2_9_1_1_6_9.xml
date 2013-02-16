@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="specs_2.9.1-1.6.9">
+    <CLASSES>
+      <root url="jar:///usr/local/scala-2.10.0/lib/specs_2.9.1-1.6.9.jar!/" />
+      <root url="jar:///usr/local/scala-2.10.0/lib/scalatest_2.10-2.0.M5b.jar!/" />
+      <root url="jar:///usr/local/scala-2.10.0/lib/junit-4.10.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
