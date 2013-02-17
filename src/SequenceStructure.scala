@@ -9,7 +9,7 @@ package melodysequence {
 import javax.sound.midi._
 import java.io.File
 import scala._
-import collection.mutable.ListBuffer
+import collection.mutable.{ListBuffer, Map}
 import java.awt.image.BufferedImage
 import java.awt.{Color, FontMetrics, Graphics2D, Font}
 
@@ -18,12 +18,9 @@ import java.awt.{Color, FontMetrics, Graphics2D, Font}
 // A melody structure.
 class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
 
-  // time, duration, offset
-  type Note = Tuple3[Long, Long, Int]
-
   // Convert the list of note on and off durations into a monophonic sequence
   // of (onset, duration, pitch). In the case of polyphony, last one wins!
-  def asMonophonic(): Seq[Note] = {
+  def asMonophonic(): Seq[Tuple3[Long, Long, Int]] = {
 
     // Some things are best looped!
     // TODO maybe this would be best recursive.
@@ -65,33 +62,66 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
 
     return events
   }
+
 }
 
 //
 object Plotter {
+  // Return the modal note duration.
+  // This is designed for tunes with lots of identical note lengths.
+  def modalDuration(inp: Seq[Tuple3[Long, Long, Int]]) : Double = {
+    val lengths = Map[Double, Int]()
+    for (note <- inp) {
+      lengths.put(note._2, (lengths.getOrElse(note._2, 0) + 1))
+    }
+
+    (lengths.toList.sortBy {entry => entry._2}).last._1
+  }
+
   def plotStructure(structure : MelodyStructure) : BufferedImage  = {
-    // Todo modal.
-    var horizontalMultiplier = 0.0525
-    var verticalMultiplier = 1
+    // Desired width of modal note length.
+    val desiredModalWidth = 10;
+
+    // Height of note.
     var noteHeight = 4
 
+    var topMargin = 10
+    var bottomMargin = 10
+    var leftMargin = 10
+    var rightMargin = 10
+
+    // Spacing between notes.
+
+    val notes = structure.asMonophonic()
+    val modalLength = modalDuration(notes)
+    val horizontalMultiplier = desiredModalWidth / modalLength;
+    val minPitch = notes.minBy(note => note._3)._3
+    val maxPitch = notes.maxBy(note => note._3)._3
+    val pitchRange =  maxPitch - minPitch
+
     // Todo width
-    val width =  1000;
-    val height = 200;
+    val height = (pitchRange * noteHeight).toInt;
+    val width = (notes.map{case(offset: Long, duration: Long, pitch:Int) => (duration * horizontalMultiplier)} sum).toInt
 
-    val buffer  : BufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    val canvasWidth = width + leftMargin + rightMargin
+    val canvasHeight = height + topMargin + bottomMargin
 
-    val graphics : Graphics2D  = buffer.createGraphics();
+    val buffer  : BufferedImage = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB)
+    val graphics : Graphics2D  = buffer.createGraphics()
 
-    graphics.setPaint(Color.black);
+    // Draw margins
+    // graphics.setPaint(Color.green)
+    // graphics.drawRect(1,1,canvasWidth-2,canvasHeight-2)
+    // graphics.drawRect(0+topMargin,0+leftMargin,canvasWidth-leftMargin-rightMargin,canvasHeight-topMargin-bottomMargin)
 
-    var notes = structure.asMonophonic()
+    val pitchX = (pitch : Int) => leftMargin + (pitch.toFloat * horizontalMultiplier).toInt
+    val pitchY = (pitch: Int) => topMargin + (height - (pitch - minPitch) * noteHeight.toInt)
 
-    // todo unfloat
+    graphics.setPaint(Color.black)
     for (note <- notes) {
       graphics.fillRect(
-        (note._1.toFloat * horizontalMultiplier).toInt,
-        height - (note._3 * verticalMultiplier).toInt,
+        pitchX(note._1.toInt),
+        pitchY(note._3),
         (note._2.toFloat * horizontalMultiplier).toInt,
         noteHeight
       )
@@ -146,8 +176,6 @@ object Midi {
         }
         case default => None
       }).flatMap(_.toList).toList
-
-    println("notes", notes)
 
     def accumulateTimeDelta(inp: List[Tuple3[Symbol, Long, Int]], time: Long = 0): List[Tuple3[Symbol, Long, Int]] = {
       inp match {
