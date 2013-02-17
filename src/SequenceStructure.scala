@@ -148,7 +148,16 @@ object Plotter {
     graphics.setPaint(Color.DARK_GRAY)
     graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 
+    // Step through colour values in a given range.
+    val lowerColourValue = 10
+    val upperColourValue = 245
+    val colourValueStep = (upperColourValue - lowerColourValue) / brackets.length
+    var colourValue = lowerColourValue
+
     for (bracket <- bracketsWithOnset) {
+
+      graphics.setColor(new Color(50, 100, colourValue))
+
       val firstX = pitchX(bracket._1.toInt)
       val firstWidth = pitchX(bracket._2.toInt) - pitchX(bracket._1.toInt)
 
@@ -185,6 +194,8 @@ object Plotter {
       path.lineTo(firstX, topMargin.toInt)
 
       graphics.fill(path);
+
+      colourValue += colourValueStep
     }
 
     return buffer
