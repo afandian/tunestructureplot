@@ -18,9 +18,10 @@ object Main {
     var track = Midi.getTrackFromMidiFile("/Volumes/Home/tunedb.entire/all/213/21323.mid", 0)
     track match {
       case Some(track: Track) => {
-        var structure = Midi.structureFromTrack(track)
+        val structure = Midi.structureFromTrack(track)
+        val brackets = List((1, 5, 7, 11), (12, 15, 17, 20), (55, 56, 58, 59), (1, 10, 21, 30), (30, 40, 50, 60))
 
-        var image : BufferedImage = Plotter.plotStructure(structure)
+        val image : BufferedImage = Plotter.plotStructure(structure, brackets)
         ImageIO.write(image, "PNG", new File("/tmp/test.png"))
       }
       case None => {}

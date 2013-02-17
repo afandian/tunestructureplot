@@ -9,9 +9,14 @@ package melodysequence {
 import javax.sound.midi._
 import java.io.File
 import scala._
+import collection.mutable
 import collection.mutable.{ListBuffer, Map}
 import java.awt.image.BufferedImage
-import java.awt.{Color, FontMetrics, Graphics2D, Font}
+import java.awt._
+import java.awt.geom.{Point2D, CubicCurve2D, Path2D}
+import scala.Tuple3
+import scala.Some
+import scala.List
 
 // TODO tail call!
 
@@ -62,7 +67,6 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
 
     return events
   }
-
 }
 
 //
@@ -78,14 +82,16 @@ object Plotter {
     (lengths.toList.sortBy {entry => entry._2}).last._1
   }
 
-  def plotStructure(structure : MelodyStructure) : BufferedImage  = {
+  // Plot a structure with highlight brackets as a sequence of (from start, from end, to start, to end)
+  def plotStructure(structure : MelodyStructure, brackets : Seq[(Int, Int, Int, Int)]) : BufferedImage  = {
     // Desired width of modal note length.
     val desiredModalWidth = 10;
 
     // Height of note.
     var noteHeight = 4
 
-    var topMargin = 10
+    // todo adaptive to the arcs.
+    var topMargin = 300
     var bottomMargin = 10
     var leftMargin = 10
     var rightMargin = 10
@@ -109,6 +115,14 @@ object Plotter {
     val buffer  : BufferedImage = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB)
     val graphics : Graphics2D  = buffer.createGraphics()
 
+
+    val hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    graphics.setRenderingHints(hints)
+
+    // White background.
+    graphics.setPaint(Color.white)
+    graphics.fillRect(0, 0, canvasWidth, canvasHeight)
+
     // Draw margins
     // graphics.setPaint(Color.green)
     // graphics.drawRect(1,1,canvasWidth-2,canvasHeight-2)
@@ -117,6 +131,7 @@ object Plotter {
     val pitchX = (pitch : Int) => leftMargin + (pitch.toFloat * horizontalMultiplier).toInt
     val pitchY = (pitch: Int) => topMargin + (height - (pitch - minPitch) * noteHeight.toInt)
 
+    // Draw the notes.
     graphics.setPaint(Color.black)
     for (note <- notes) {
       graphics.fillRect(
@@ -125,6 +140,51 @@ object Plotter {
         (note._2.toFloat * horizontalMultiplier).toInt,
         noteHeight
       )
+    }
+
+    // Turn the note indexes to offsets within the tune.
+    // Todo: If lookup in notes is O(N) then this could be slow.
+    val bracketsWithOnset = brackets.map {case (a: Int, b: Int, c: Int, d: Int) => (notes(a)._1,notes(b)._1 + notes(b)._2,notes(c)._1,notes(d)._1 + notes(d)._2)}
+    graphics.setPaint(Color.DARK_GRAY)
+    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+
+    for (bracket <- bracketsWithOnset) {
+      val firstX = pitchX(bracket._1.toInt)
+      val firstWidth = pitchX(bracket._2.toInt) - pitchX(bracket._1.toInt)
+
+      val secondX = pitchX(bracket._3.toInt)
+      val secondWidth = pitchX(bracket._4.toInt) - pitchX(bracket._3.toInt)
+
+      // Arc
+      var outerRadius =  (secondX + secondWidth) - firstX
+      var innerRadius =  secondX - (firstX + firstWidth)
+
+      var path = new Path2D.Double()
+
+      // top outer curve, first to second
+      path.moveTo(firstX, topMargin.toInt)
+      path.curveTo(firstX, topMargin.toInt,
+        (secondX - (firstX + firstWidth)) / 2 + firstX + firstWidth, topMargin.toInt - outerRadius,
+        secondX + secondWidth, topMargin.toInt
+      )
+
+      // highlight second region
+      path.lineTo(secondX + secondWidth, pitchY(minPitch-1))
+      path.lineTo(secondX, pitchY(minPitch - 1))
+      path.lineTo(secondX, topMargin.toInt)
+
+      // inner curve, second to first
+      path.curveTo(secondX, topMargin.toInt,
+        (secondX - (firstX + firstWidth)) / 2 + firstX + firstWidth, topMargin.toInt - innerRadius,
+        firstX + firstWidth, topMargin.toInt
+      )
+
+      // highlight second region
+      path.lineTo(firstX + firstWidth, pitchY(minPitch-1))
+      path.lineTo(firstX, pitchY(minPitch - 1))
+      path.lineTo(firstX, topMargin.toInt)
+
+      graphics.fill(path);
     }
 
     return buffer
