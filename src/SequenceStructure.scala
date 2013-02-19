@@ -1,9 +1,9 @@
 import java.awt.image.BufferedImage
 
 /**
- * User: joe
- * Date: 16/02/2013
- * Time: 14:07
+ * Joe Wass
+ * 2013
+ * joe@afandian.com
  */
 
 package melodysequence {
@@ -23,9 +23,10 @@ import scala.List
 // TODO tail call!
 
 case class Note(offset: Long, duration:  Long, pitch: Int)
+case class MidiNoteEvent(eventType: Symbol, offset: Long, pitch: Int)
 
 // A melody structure.
-class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
+class MelodyStructure(events: List[MidiNoteEvent]) {
   // Convert the list of note on and off durations into a monophonic sequence
   // of (onset, duration, pitch). In the case of polyphony, last one wins!
   def asMonophonic(): Seq[Note] = {
@@ -37,7 +38,7 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
 
     for (event <- this.events) {
       event match {
-        case ('NoteOn, time, pitch) => {
+        case MidiNoteEvent('NoteOn, time, pitch) => {
           var duration = if (lastOnset == -1) 0; else time - lastOnset
 
           if (lastOnPitch != -1) {
@@ -49,7 +50,7 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
           lastOnPitch = pitch
           lastOnset = time
         };
-        case ('NoteOff, time, pitch) => {
+        case MidiNoteEvent('NoteOff, time, pitch) => {
 
           var duration = if (lastOnset == -1) 0; else time - lastOnset
 
@@ -330,18 +331,18 @@ object Midi {
     yield event.getMessage.getStatus match {
         // Note on
         case 0x90 => {
-          Some(Tuple3[Symbol, Long, Int]('NoteOn, event.getTick, getPitchByte(event)))
+          Some(MidiNoteEvent('NoteOn, event.getTick, getPitchByte(event)))
         }
         // Note off
         case 0x80 => {
-          Some(Tuple3[Symbol, Long, Int]('NoteOff, event.getTick, getPitchByte(event)))
+          Some(MidiNoteEvent('NoteOff, event.getTick, getPitchByte(event)))
         }
         case default => None
       }).flatMap(_.toList).toList
 
-    def accumulateTimeDelta(inp: List[Tuple3[Symbol, Long, Int]], time: Long = 0): List[Tuple3[Symbol, Long, Int]] = {
+    def accumulateTimeDelta(inp: List[MidiNoteEvent], time: Long = 0): List[MidiNoteEvent] = {
       inp match {
-        case x :: xs => Tuple3[Symbol, Long, Int](x._1, x._2, x._3) :: accumulateTimeDelta(xs, time + x._2)
+        case x :: xs => MidiNoteEvent(x.eventType, x.offset, x.pitch) :: accumulateTimeDelta(xs, time + x.offset)
         case Nil => Nil
       }
     }

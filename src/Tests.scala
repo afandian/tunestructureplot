@@ -3,16 +3,13 @@ import org.scalatest.FlatSpec
 import org.specs.runner.JUnitSuiteRunner
 
 /**
- * Created with IntelliJ IDEA.
- * User: joe
- * Date: 16/02/2013
- * Time: 16:01
- * To change this template use File | Settings | File Templates.
+ * Joe Wass
+ * 2013
+ * joe@afandian.com
  */
 
 import org.scalatest.{FlatSpec, FunSuite}
 import org.specs.runner.JUnitSuiteRunner
-import scala.collection.mutable.Stack
 import org.junit.runner.RunWith
 import melodysequence.Functions
 
