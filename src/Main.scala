@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import javax.sound.midi.Track
-import melodysequence.{Midi, Plotter}
+import melodysequence.{MelodyMatch, Midi, Plotter}
 
 object Main {
 
@@ -25,8 +25,8 @@ object Main {
         var allPrefixes = melodysequence.Functions.allPrefixesWithSkips(identities.toList, 5)
 
         // Kludge. Remove short ones.
-        allPrefixes = allPrefixes.filter{case(a: Int, b: Int, length: Int) => length > 3}
-        val brackets = allPrefixes.map {case(a: Int, b: Int, length: Int) => (a, a + length - 1 , b, b + length - 1)}
+        allPrefixes = allPrefixes.filter{case MelodyMatch(a, b, length) => length > 3}
+        val brackets = allPrefixes.map {case MelodyMatch(a, b, length) => (a, a + length - 1 , b, b + length - 1)}
         val image : BufferedImage = Plotter.plotStructure(tune, brackets)
         ImageIO.write(image, "PNG", new File(outputPath))
       }

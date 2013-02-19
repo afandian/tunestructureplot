@@ -15,20 +15,21 @@ import scala.collection.mutable
 import scala.collection.mutable.{ListBuffer, Map}
 import java.awt.image.BufferedImage
 import java.awt._
-import geom.{Arc2D, Point2D, CubicCurve2D, Path2D}
+import geom.{Arc2D, Path2D}
 import scala.Some
-import scala.Tuple3
 import scala.List
 
 // TODO tail call!
 
 case class Note(offset: Long, duration:  Long, pitch: Int)
 case class MidiNoteEvent(eventType: Symbol, offset: Long, pitch: Int)
+case class MelodyMatch(from: Int, to: Int, length: Int)
 
 // A melody structure.
 class MelodyStructure(events: List[MidiNoteEvent]) {
-  // Convert the list of note on and off durations into a monophonic sequence
-  // of (onset, duration, pitch). In the case of polyphony, last one wins!
+
+  // Convert the list of note on and off durations into a monophonic sequence.
+  // In the case of polyphony, last one wins!
   def asMonophonic(): Seq[Note] = {
     // Some things are best looped!
     // TODO maybe this would be best recursive.
@@ -42,6 +43,7 @@ class MelodyStructure(events: List[MidiNoteEvent]) {
           var duration = if (lastOnset == -1) 0; else time - lastOnset
 
           if (lastOnPitch != -1) {
+
             // Argh! We've had two note-ons!
             // Append the old one first.
             events.append(Note(time, duration, lastOnPitch))
@@ -50,8 +52,8 @@ class MelodyStructure(events: List[MidiNoteEvent]) {
           lastOnPitch = pitch
           lastOnset = time
         };
-        case MidiNoteEvent('NoteOff, time, pitch) => {
 
+        case MidiNoteEvent('NoteOff, time, pitch) => {
           var duration = if (lastOnset == -1) 0; else time - lastOnset
 
           if (lastOnPitch == pitch) {
@@ -78,8 +80,7 @@ class MelodyStructure(events: List[MidiNoteEvent]) {
     def tuneIdentities(inp: Seq[Note]) =
       inp.map { case Note(_, duration, pitch) => (pitch, duration)}
 
-    // From a tune structure generate a sequence of brackets that indicate where a sequence of notes
-    // is duplicated in form (first range start, end, second range start, end).
+    // The modal (i.e. most common) duration present.
     def modalDuration(inp: Seq[Note]) : Double = {
       val lengths = Map[Double, Int]()
       for (note <- inp) {
@@ -98,11 +99,10 @@ class MelodyStructure(events: List[MidiNoteEvent]) {
         .length
 
     // For a given starting point (and minimum sequence length) find all the prefixes.
-    // Return a stream of (firstIndex, secondIndex, length)
-    def prefixForSearchIndex(sequence: List[Any], aI : Int, minOffset : Int) : Seq[(Int, Int, Int)] = {
+    def prefixForSearchIndex(sequence: List[Any], aI : Int, minOffset : Int) : Seq[MelodyMatch] = {
       (for (bI <- Range(aI + minOffset, sequence.length))
-      yield (aI, bI, longestPrefix(sequence, aI, bI))).filter{
-        case(_, _, length) => length > 0 && length >= 1
+      yield MelodyMatch(aI, bI, longestPrefix(sequence, aI, bI))).filter{
+        case MelodyMatch(_, _, length) => length > 0 && length >= 1
       }
     }
 
@@ -112,17 +112,17 @@ class MelodyStructure(events: List[MidiNoteEvent]) {
       yield prefixForSearchIndex(sequence, i, minLength)).flatten
 
     // All prefixes, skipping comb-type short ones.
-    // To tidy up.
-    def allPrefixesWithSkips(sequence: List[Any], minLength : Int, i : Int = 0) : Seq[(Int, Int, Int)] = {
-      var i = 0
-      val prefixes = new mutable.ListBuffer[(Int, Int, Int)]()
+    def allPrefixesWithSkips(sequence: List[Any], minLength : Int, i : Int = 0) : Seq[MelodyMatch] = {
+      // TODO: this could be immutable and recursive.
+      var i : Int = 0
+      val prefixes = new mutable.ListBuffer[MelodyMatch]()
       do {
         val elems = prefixForSearchIndex(sequence, i, minLength)
 
         if (elems.length > 0) {
           prefixes ++= elems
 
-          i += elems.map{case (i : Int, j: Int, length: Int) => length}.max
+          i += elems.map{case MelodyMatch(_, _, length) => length}.max.toInt
         }
         else {
           i += 1
@@ -138,7 +138,7 @@ object Plotter {
   // Return the modal note duration.
   // This is designed for tunes with lots of identical note lengths.
 
-  // Plot a structure with highlight brackets as a sequence of (from start, from end, to start, to end)
+  // Plot a structure with highlight brackets.
   def plotStructure(notes : Seq[Note], brackets : Seq[(Int, Int, Int, Int)]) : BufferedImage  = {
     // Desired width of modal note length.
     val desiredModalWidth = 10;
@@ -226,38 +226,6 @@ object Plotter {
       val outerRadius =  (secondX + secondWidth) - firstX
       val innerRadius = secondX - (firstX + firstWidth) / 2
 
-      val path = new Path2D.Double()
-
-
-      /*
-      // retired bezier curve code.
-      // arcs look cooler and less elephantine.
-      // top outer curve, first to second
-      path.moveTo(firstX, topMargin.toInt)
-      path.curveTo(firstX, topMargin.toInt,
-        (secondX - (firstX + firstWidth)) / 2 + firstX + firstWidth, topMargin.toInt - outerRadius,
-        secondX + secondWidth, topMargin.toInt
-      )
-
-      // highlight second region
-      path.lineTo(secondX + secondWidth, pitchY(minPitch-1))
-      path.lineTo(secondX, pitchY(minPitch - 1))
-      path.lineTo(secondX, topMargin.toInt)
-
-      // inner curve, second to first
-      path.curveTo(secondX, topMargin.toInt,
-          (secondX - (firstX + firstWidth)) / 2 + firstX + firstWidth, topMargin.toInt - innerRadius,
-        firstX + firstWidth, topMargin.toInt
-      )
-
-      // highlight second region
-      path.lineTo(firstX + firstWidth, topMargin.toInt)
-
-      path.lineTo(firstX + firstWidth, pitchY(minPitch-1))
-      path.lineTo(firstX, pitchY(minPitch - 1))
-      path.lineTo(firstX, topMargin.toInt)
-      */
-
       // centre of arcs
       val x = (secondX - (firstX + firstWidth)) / 2 + firstX + firstWidth
       val y = topMargin.toInt
@@ -278,6 +246,7 @@ object Plotter {
       val arc2 : Arc2D = new Arc2D.Double(x - r2, y - r2, d2, d2, startAngle + endAngle, -endAngle, Arc2D.OPEN);
 
       // a path with two arcs
+      val path = new Path2D.Double()
       path.append(arc1, false);
       path.append(arc2, true);
       path.closePath();
@@ -321,6 +290,7 @@ object Midi {
     }
   }
 
+  // Generate a melody structure from a MIDI track.
   def structureFromTrack(track: Track): MelodyStructure = {
     val events = for {eventI <- 0 until track.size} yield track.get(eventI);
 
@@ -329,10 +299,12 @@ object Midi {
 
     val notes = (for (event <- events)
     yield event.getMessage.getStatus match {
+
         // Note on
         case 0x90 => {
           Some(MidiNoteEvent('NoteOn, event.getTick, getPitchByte(event)))
         }
+
         // Note off
         case 0x80 => {
           Some(MidiNoteEvent('NoteOff, event.getTick, getPitchByte(event)))

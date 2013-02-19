@@ -4,8 +4,8 @@
     <list default="true" id="2b7d42f2-8276-408e-85e3-3d1922e333f8" name="Default" comment="" />
     <ignored path="tunestructureplot.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Main.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361279746044" ignored="false" />
-    <file path="/SequenceStructure.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361279149669" ignored="false" />
+    <file path="/Main.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361280708770" ignored="false" />
+    <file path="/SequenceStructure.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361280967579" ignored="false" />
     <file path="/Tests.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361194367448" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -68,10 +68,19 @@
       <file leaf-file-name="SequenceStructure.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SequenceStructure.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="-2.2093024">
+            <state line="101" column="83" selection-start="3096" selection-end="3096" vertical-scroll-proportion="0.37530267">
               <folding>
                 <element signature="e#112#137#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Main.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Main.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="24" column="56" selection-start="748" selection-end="748" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -106,9 +115,9 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/SequenceStructure.scala" />
         <option value="$PROJECT_DIR$/src/Tests.scala" />
         <option value="$PROJECT_DIR$/src/Main.scala" />
+        <option value="$PROJECT_DIR$/src/SequenceStructure.scala" />
       </list>
     </option>
   </component>
@@ -669,14 +678,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="17" selection-start="1210" selection-end="1210" vertical-scroll-proportion="0.8716707">
+        <state line="24" column="56" selection-start="748" selection-end="748" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SequenceStructure.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="-2.2093024">
+        <state line="101" column="83" selection-start="3096" selection-end="3096" vertical-scroll-proportion="0.37530267">
           <folding>
             <element signature="e#112#137#0" expanded="true" />
           </folding>
