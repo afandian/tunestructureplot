@@ -14,13 +14,8 @@ import melodysequence.{Midi, Plotter}
 
 object Main {
 
-  def main(args : Array[String]) {
-    val butterfly = "/Volumes/Home/tunedb.entire/all/213/21323.mid"
-    val oldFavourite = "/Volumes/Home/tunedb.entire/all/985/98555.mid"
-    val eog = "/Volumes/Home/tunedb.entire/all/155/964/155964.mid"
-
-    var track = Midi.getTrackFromMidiFile(eog, 0)
-
+  def plotMidiFile(inputPath : String, outputPath : String) {
+    var track = Midi.getTrackFromMidiFile(inputPath, 0)
 
     track match {
       case Some(track: Track) => {
@@ -33,11 +28,18 @@ object Main {
         allPrefixes = allPrefixes.filter{case(a: Int, b: Int, length: Int) => length > 3}
         val brackets = allPrefixes.map {case(a: Int, b: Int, length: Int) => (a, a + length - 1 , b, b + length - 1)}
         val image : BufferedImage = Plotter.plotStructure(tune, brackets)
-        ImageIO.write(image, "PNG", new File("/tmp/eog.png"))
+        ImageIO.write(image, "PNG", new File(outputPath))
       }
       case None => {}
     }
+  }
 
+  // Test runner.
+  def main(args : Array[String]) {
+    new File("testoutput").mkdirs()
 
+    plotMidiFile("testinput/butterfly.mid", "testoutput/butterfly.png")
+    plotMidiFile("testinput/ellen-o-grady.mid", "testoutput/ellen-o-grady.png")
+    plotMidiFile("testinput/old-favourite.mid", "testoutput/old-favourite.png")
   }
 }

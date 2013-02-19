@@ -4,8 +4,8 @@
     <list default="true" id="2b7d42f2-8276-408e-85e3-3d1922e333f8" name="Default" comment="" />
     <ignored path="tunestructureplot.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Main.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361215843536" ignored="false" />
-    <file path="/SequenceStructure.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361215888360" ignored="false" />
+    <file path="/Main.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361279746044" ignored="false" />
+    <file path="/SequenceStructure.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361279149669" ignored="false" />
     <file path="/Tests.scala" changelist="2b7d42f2-8276-408e-85e3-3d1922e333f8" time="1361194367448" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -65,21 +65,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Main.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Main.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="59" selection-start="913" selection-end="913" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="SequenceStructure.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SequenceStructure.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="341" column="1" selection-start="11396" selection-end="11396" vertical-scroll-proportion="0.7375">
+            <state line="7" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="-2.2093024">
               <folding>
-                <element signature="e#120#145#0" expanded="true" />
+                <element signature="e#112#137#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -88,9 +79,9 @@
       <file leaf-file-name="Tests.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Tests.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="31" selection-start="1010" selection-end="1035" vertical-scroll-proportion="0.0">
+            <state line="55" column="3" selection-start="1757" selection-end="1757" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#257#298#0" expanded="true" />
+                <element signature="e#153#194#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -115,9 +106,9 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
+        <option value="$PROJECT_DIR$/src/SequenceStructure.scala" />
         <option value="$PROJECT_DIR$/src/Tests.scala" />
         <option value="$PROJECT_DIR$/src/Main.scala" />
-        <option value="$PROJECT_DIR$/src/SequenceStructure.scala" />
       </list>
     </option>
   </component>
@@ -669,25 +660,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Tests.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="31" selection-start="1010" selection-end="1035" vertical-scroll-proportion="0.0">
+        <state line="55" column="3" selection-start="1757" selection-end="1757" vertical-scroll-proportion="0.0">
           <folding>
-            <element signature="e#257#298#0" expanded="true" />
+            <element signature="e#153#194#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="59" selection-start="913" selection-end="913" vertical-scroll-proportion="0.0">
+        <state line="36" column="17" selection-start="1210" selection-end="1210" vertical-scroll-proportion="0.8716707">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SequenceStructure.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="341" column="1" selection-start="11396" selection-end="11396" vertical-scroll-proportion="0.7375">
+        <state line="7" column="0" selection-start="85" selection-end="85" vertical-scroll-proportion="-2.2093024">
           <folding>
-            <element signature="e#120#145#0" expanded="true" />
+            <element signature="e#112#137#0" expanded="true" />
           </folding>
         </state>
       </provider>

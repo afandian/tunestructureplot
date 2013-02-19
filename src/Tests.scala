@@ -54,6 +54,4 @@ class FirstSpec extends FlatSpec {
       List(1,2,3,4,1,2,3,4,1,2,3), 0, 3) ==
       List((0,4,4), (0,8,3)))
   }
-
-
 }
