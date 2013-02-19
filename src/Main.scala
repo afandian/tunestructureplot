@@ -27,7 +27,7 @@ object Main {
         val structure = Midi.structureFromTrack(track)
         val tune = structure.asMonophonic()
         val identities = melodysequence.Functions.tuneIdentities(tune)//.slice(0, 20)
-        var allPrefixes = melodysequence.Functions.allPrefixesRecursive(identities.toList, 5)
+        var allPrefixes = melodysequence.Functions.allPrefixesWithSkips(identities.toList, 5)
 
         // Kludge. Remove short ones.
         allPrefixes = allPrefixes.filter{case(a: Int, b: Int, length: Int) => length > 3}

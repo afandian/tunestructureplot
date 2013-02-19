@@ -16,23 +16,24 @@ import scala.collection.mutable.{ListBuffer, Map}
 import java.awt.image.BufferedImage
 import java.awt._
 import geom.{Arc2D, Point2D, CubicCurve2D, Path2D}
-import scala.Tuple3
 import scala.Some
+import scala.Tuple3
 import scala.List
 
 // TODO tail call!
 
+case class Note(offset: Long, duration:  Long, pitch: Int)
+
 // A melody structure.
 class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
-
   // Convert the list of note on and off durations into a monophonic sequence
   // of (onset, duration, pitch). In the case of polyphony, last one wins!
-  def asMonophonic(): Seq[Tuple3[Long, Long, Int]] = {
+  def asMonophonic(): Seq[Note] = {
     // Some things are best looped!
     // TODO maybe this would be best recursive.
     var lastOnPitch: Int = -1
     var lastOnset: Long = 0
-    var events = ListBuffer[Tuple3[Long, Long, Int]]()
+    var events = ListBuffer[Note]()
 
     for (event <- this.events) {
       event match {
@@ -42,7 +43,7 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
           if (lastOnPitch != -1) {
             // Argh! We've had two note-ons!
             // Append the old one first.
-            events.append((time, duration, lastOnPitch))
+            events.append(Note(time, duration, lastOnPitch))
           }
 
           lastOnPitch = pitch
@@ -53,7 +54,7 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
           var duration = if (lastOnset == -1) 0; else time - lastOnset
 
           if (lastOnPitch == pitch) {
-            events.append((lastOnset, duration, pitch))
+            events.append(Note(lastOnset, duration, pitch))
             lastOnPitch = -1
             lastOnset = -1
           } else {
@@ -73,15 +74,15 @@ class MelodyStructure(events: List[Tuple3[Symbol, Long, Int]]) {
   object Functions {
     // Sequence of tune note identities.
     // In future we can change this to include / exclude duration.
-    def tuneIdentities(inp: Seq[Tuple3[Long, Long, Int]]) =
-      inp.map { case (_, duration, pitch : Int ) => (pitch, duration)}
+    def tuneIdentities(inp: Seq[Note]) =
+      inp.map { case Note(_, duration, pitch) => (pitch, duration)}
 
     // From a tune structure generate a sequence of brackets that indicate where a sequence of notes
     // is duplicated in form (first range start, end, second range start, end).
-    def modalDuration(inp: Seq[Tuple3[Long, Long, Int]]) : Double = {
+    def modalDuration(inp: Seq[Note]) : Double = {
       val lengths = Map[Double, Int]()
       for (note <- inp) {
-        lengths.put(note._2, (lengths.getOrElse(note._2, 0) + 1))
+        lengths.put(note.duration, (lengths.getOrElse(note.duration, 0) + 1))
       }
 
       (lengths.toList.sortBy {entry => entry._2}).last._1
@@ -137,7 +138,7 @@ object Plotter {
   // This is designed for tunes with lots of identical note lengths.
 
   // Plot a structure with highlight brackets as a sequence of (from start, from end, to start, to end)
-  def plotStructure(notes : Seq[Tuple3[Long, Long, Int]], brackets : Seq[(Int, Int, Int, Int)]) : BufferedImage  = {
+  def plotStructure(notes : Seq[Note], brackets : Seq[(Int, Int, Int, Int)]) : BufferedImage  = {
     // Desired width of modal note length.
     val desiredModalWidth = 10;
 
@@ -146,12 +147,14 @@ object Plotter {
 
     val modalLength = Functions.modalDuration(notes)
     val horizontalMultiplier = desiredModalWidth / modalLength;
-    val minPitch = notes.minBy(note => note._3)._3
-    val maxPitch = notes.maxBy(note => note._3)._3
+    val minPitch = notes.minBy(note => note.pitch).pitch
+    val maxPitch = notes.maxBy(note => note.pitch).pitch
     val pitchRange =  maxPitch - minPitch
 
     val height = (pitchRange * noteHeight).toInt;
-    val width = (notes.map{case(offset: Long, duration: Long, pitch:Int) => (duration * horizontalMultiplier)} sum).toInt
+    val width = (notes.map {
+      case(Note(offset, duration, pitch)) => (duration * horizontalMultiplier)
+    } sum).toInt
 
     // todo measure max radius and resize to that
     val topMargin = width / 2 // top margin square to accommodate a big arc
@@ -184,16 +187,22 @@ object Plotter {
     graphics.setPaint(Color.black)
     for (note <- notes) {
       graphics.fillRect(
-        pitchX(note._1.toInt),
-        pitchY(note._3),
-        (note._2.toFloat * horizontalMultiplier).toInt,
+        pitchX(note.offset.toInt),
+        pitchY(note.pitch),
+        (note.duration.toFloat * horizontalMultiplier).toInt,
         noteHeight
       )
     }
 
     // Turn the note indexes to offsets within the tune.
     // Todo: If lookup in notes is O(N) then this could be slow.
-    val bracketsWithOnset = brackets.map {case (a: Int, b: Int, c: Int, d: Int) => (notes(a)._1,notes(b)._1 + notes(b)._2,notes(c)._1,notes(d)._1 + notes(d)._2)}
+    val bracketsWithOnset = brackets.map {
+      case (a: Int, b: Int, c: Int, d: Int) => (
+        notes(a).offset,
+        notes(b).offset + notes(b).duration,
+        notes(c).offset,
+        notes(d).offset + notes(d).duration
+        )}
     graphics.setPaint(Color.DARK_GRAY)
     graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f));
 
